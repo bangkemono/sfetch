@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# still in development
+# TBA : better colors, faster implementation, more logos
+
+#COLORS
+bold=$(tput bold)
+pink=$(tput setaf 175)
+green=$(tput setaf 71)
+white=$(tput setaf 255)
+blue=$(tput setaf 75)
+lcyan=$(tput setaf 153)
+reset=$(tput sgr0)
+
+#BASIC INFO
+OS=$(grep PRETTY_NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
+KERNEL="$(uname -r)"
+USR="$(whoami)@$(cat /etc/hostname)"
+SHELL=$(grep "$USER" /etc/passwd | awk -F"/" '{printf "%s\n", $5}')
+UPTIME_MIN=$(awk '{printf "%d\n", $1 / 60 % 60}' /proc/uptime)
+UPTIME_HRS=$(awk '{printf "%d\n", $1 / 60 / 60 % 24}' /proc/uptime)
+UPTIME_DAY=$(awk '{printf "%d\n", $1 / 60 / 60 / 24}' /proc/uptime)
+
+#MEMORY (MEM_USE IS NOT 100% ACCURATE)
+MEM_FRE=$(grep MemFree /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
+MEM_BUF=$(grep Buffers /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
+MEM_CCH=$(grep Cached /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
+MEM_REC=$(grep SReclaimable /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
+MEM_TOT=$(grep MemTotal /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
+let MEM_USE=$MEM_TOT-$MEM_FRE-$MEM_BUF-$MEM_CCH-$MEM_REC
+
+col=$lcyan
+
+OS_NAME=$(grep NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
+case $OS_NAME in
+    [Aa]rch*)
+        LOGO=("      /\         "
+              "     /  \        "
+              "    /\   \       "
+              "   /      \      "
+              "  /   ,,   \     "
+              " /   |  |  -\    "
+              "/_-''    ''-_\   ")
+        PKGS="$(pacman -Q | wc -l)"
+        ;;
+    [Ff]edora*)
+        LOGO=("      ,'''''''',   "
+              "      |   ,..  |   "
+              "  ,...|  |..,'_'   "
+              ".' ,..   ...'      "
+              "| |   |  |         "
+              "| '...'  |         "
+              " '------'          ")
+        PKGS="$(rpm -qa | wc -l)"
+        ;;
+esac
+
+printf "${bold}${col}${LOGO[0]}USR${reset}: ${bold}${USR}${reset}\n"
+printf "${bold}${col}${LOGO[1]}OS${reset}: ${bold}${OS}${reset}\n"
+printf "${bold}${col}${LOGO[2]}KERNEL${reset}: ${bold}${KERNEL}${reset}\n"
+printf "${bold}${col}${LOGO[3]}PKGS${reset}: ${bold}${PKGS}${reset}\n"
+printf "${bold}${col}${LOGO[4]}SHELL${reset}: ${bold}${SHELL}${reset}\n" 
+printf "${bold}${col}${LOGO[5]}UPTIME${reset}: ${bold}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${reset}\n"
+printf "${bold}${col}${LOGO[6]}MEM${reset}: ${bold}${MEM_USE}/${MEM_TOT}${reset}\n\n"
+
