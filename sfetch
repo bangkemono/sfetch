@@ -35,43 +35,43 @@ MEM_USE=$(expr $MEM_TOT - $MEM_FRE - $MEM_REC - $MEM_BUF - $MEM_CCH)
 OS_NAME=$(grep NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
 case $OS_NAME in
     [Aa]rch*)
-        BANNER=("       /\         "
-                "      /  \        "
-                "     /\   \       "
-                "    /      \      "
-                "   /   ,,   \     "
-                "  /   |  |  -\    "
-                " /_-''    ''-_\   ")
+        BANNER0="       /\         "
+        BANNER1="      /  \        "
+        BANNER2="     /\   \       "
+        BANNER3="    /      \      "
+        BANNER4="   /   ,,   \     "
+        BANNER5="  /   |  |  -\    "
+        BANNER6=" /_-''    ''-_\   "
         PKGS="$(pacman -Q | wc -l)"
         ;;
     [Ff]edora*)
-        BANNER=("        ,.......    "
-                "       |   ,..  |   "
-                "   ,...|  |..,'_'   "
-                " .' ,..   ...'      "
-                " | |   |  |         "
-                " | '...'  |         "
-                "  '------'          ")
+        BANNER0="        ,.......    "
+        BANNER1="       |   ,..  |   "
+        BANNER2="   ,...|  |..,'_'   "
+        BANNER3=" .' ,..   ...'      "
+        BANNER4=" | |   |  |         "
+        BANNER5=" | '...'  |         "
+        BANNER6="  '------'          "
         PKGS="$(rpm -qa | wc -l)"
         ;;
     [Uu]buntu*)
-        BANNER=("                 "
-                "     , ---(__)   "
-                "    /  ___  \    "
-                " (__) |   |      "
-                "    \  --- _/    "
-                "     ' ---(__)   "
-                "                 ")
+        BANNER0="                 "
+        BANNER1="     , ---(__)   "
+        BANNER2="    /  ___  \    "
+        BANNER3=" (__) |   |      "
+        BANNER4="    \  --- _/    "
+        BANNER5="     ' ---(__)   "
+        BANNER6="                 "
         PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
         ;;
     [Dd]ebian*)
-        BANNER=("   ______    "
-                " //  ,.  \   "
-                " |  / -' /   "
-                " |  \_.-'    "
-                " '.          "
-                "   '-__      "
-                "             ")
+        BANNER0="   ______    "
+        BANNER1=" //  ,.  \   "
+        BANNER2=" |  / -' /   "
+        BANNER3=" |  \_.-'    "
+        BANNER4=" '.          "
+        BANNER5="   '-__      "
+        BANNER6="             "
         PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
         ;;
 esac
@@ -81,11 +81,11 @@ esac
 
 col=$lpink
 
-printf "${bold}${col}${BANNER[0]}USR${reset}: ${bold}${USR}${reset}\n"
-printf "${bold}${col}${BANNER[1]}OS${reset}: ${bold}${OS}${reset}\n"
-printf "${bold}${col}${BANNER[2]}KERNEL${reset}: ${bold}${KERNEL}${reset}\n"
-printf "${bold}${col}${BANNER[3]}PKGS${reset}: ${bold}${PKGS}${reset}\n"
-printf "${bold}${col}${BANNER[4]}SHELL${reset}: ${bold}${SHELL}${reset}\n" 
-printf "${bold}${col}${BANNER[5]}UPTIME${reset}: ${bold}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${reset}\n"
-printf "${bold}${col}${BANNER[6]}MEM${reset}: ${bold}${MEM_USE}M/${MEM_TOT}M${reset}\n\n"
+printf "${bold}${col}${BANNER0}USR${reset}: ${bold}${USR}${reset}\n"
+printf "${bold}${col}${BANNER1}OS${reset}: ${bold}${OS}${reset}\n"
+printf "${bold}${col}${BANNER2}KERNEL${reset}: ${bold}${KERNEL}${reset}\n"
+printf "${bold}${col}${BANNER3}PKGS${reset}: ${bold}${PKGS}${reset}\n"
+printf "${bold}${col}${BANNER4}SHELL${reset}: ${bold}${SHELL}${reset}\n" 
+printf "${bold}${col}${BANNER5}UPTIME${reset}: ${bold}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${reset}\n"
+printf "${bold}${col}${BANNER6}MEM${reset}: ${bold}${MEM_USE}M/${MEM_TOT}M${reset}\n\n"
 
