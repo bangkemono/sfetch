@@ -1,16 +1,19 @@
 #!/bin/sh
 
 # still in development
-# TBA : better colors, faster implementation, more logos
+# TBA : more colors, faster implementation, more banners
 
 #COLORS
-bold=$(tput bold)
 pink=$(tput setaf 175)
+lpink=$(tput setaf 224)
 green=$(tput setaf 71)
 white=$(tput setaf 255)
-blue=$(tput setaf 75)
-lcyan=$(tput setaf 153)
+lblue=$(tput setaf 153)
+red=$(tput setaf 160)
+yellow=$(tput setaf 226)
+
 reset=$(tput sgr0)
+bold=$(tput bold)
 
 #BASIC INFO
 OS=$(grep PRETTY_NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
@@ -29,37 +32,60 @@ MEM_REC=$(grep SReclaimable /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
 MEM_TOT=$(grep MemTotal /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
 let MEM_USE=$MEM_TOT-$MEM_FRE-$MEM_BUF-$MEM_CCH-$MEM_REC
 
-col=$lcyan
-
 OS_NAME=$(grep NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
 case $OS_NAME in
     [Aa]rch*)
-        LOGO=("      /\         "
-              "     /  \        "
-              "    /\   \       "
-              "   /      \      "
-              "  /   ,,   \     "
-              " /   |  |  -\    "
-              "/_-''    ''-_\   ")
+        BANNER=("       /\         "
+              "      /  \        "
+              "     /\   \       "
+              "    /      \      "
+              "   /   ,,   \     "
+              "  /   |  |  -\    "
+              " /_-''    ''-_\   ")
         PKGS="$(pacman -Q | wc -l)"
         ;;
     [Ff]edora*)
-        LOGO=("      ,'''''''',   "
-              "      |   ,..  |   "
-              "  ,...|  |..,'_'   "
-              ".' ,..   ...'      "
-              "| |   |  |         "
-              "| '...'  |         "
-              " '------'          ")
+        BANNER=("        ,.......    "
+              "       |   ,..  |   "
+              "   ,...|  |..,'_'   "
+              " .' ,..   ...'      "
+              " | |   |  |         "
+              " | '...'  |         "
+              "  '------'          ")
         PKGS="$(rpm -qa | wc -l)"
+        ;;
+    [Uu]buntu*)
+        BANNER=("                 "
+              "     , ---(__)   "
+              "    /  ___  \    "
+              " (__) |   |      "
+              "    \  --- _/    "
+              "     ' ---(__)   "
+              "                 ")
+        PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
+        ;;
+    [Dd]ebian*)
+        BANNER=("   ______    "
+              " //  ,.  \   "
+              " |  / -' /   "
+              " |  \_.-'    "
+              " '.          "
+              "   '-__      "
+              "             ")
+        PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
         ;;
 esac
 
-printf "${bold}${col}${LOGO[0]}USR${reset}: ${bold}${USR}${reset}\n"
-printf "${bold}${col}${LOGO[1]}OS${reset}: ${bold}${OS}${reset}\n"
-printf "${bold}${col}${LOGO[2]}KERNEL${reset}: ${bold}${KERNEL}${reset}\n"
-printf "${bold}${col}${LOGO[3]}PKGS${reset}: ${bold}${PKGS}${reset}\n"
-printf "${bold}${col}${LOGO[4]}SHELL${reset}: ${bold}${SHELL}${reset}\n" 
-printf "${bold}${col}${LOGO[5]}UPTIME${reset}: ${bold}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${reset}\n"
-printf "${bold}${col}${LOGO[6]}MEM${reset}: ${bold}${MEM_USE}/${MEM_TOT}${reset}\n\n"
+#CONFIGURATION
+#colors are available at the top of the file
+
+col=$lpink
+
+printf "${bold}${col}${BANNER[0]}USR${reset}: ${bold}${USR}${reset}\n"
+printf "${bold}${col}${BANNER[1]}OS${reset}: ${bold}${OS}${reset}\n"
+printf "${bold}${col}${BANNER[2]}KERNEL${reset}: ${bold}${KERNEL}${reset}\n"
+printf "${bold}${col}${BANNER[3]}PKGS${reset}: ${bold}${PKGS}${reset}\n"
+printf "${bold}${col}${BANNER[4]}SHELL${reset}: ${bold}${SHELL}${reset}\n" 
+printf "${bold}${col}${BANNER[5]}UPTIME${reset}: ${bold}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${reset}\n"
+printf "${bold}${col}${BANNER[6]}MEM${reset}: ${bold}${MEM_USE}M/${MEM_TOT}M${reset}\n\n"
 
