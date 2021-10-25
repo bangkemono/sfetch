@@ -27,51 +27,51 @@ UPTIME_DAY=$(awk '{printf "%d\n", $1 / 60 / 60 / 24}' /proc/uptime)
 #MEMORY (MEM_USE IS NOT 100% ACCURATE)
 MEM_FRE=$(grep MemFree /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
 MEM_BUF=$(grep Buffers /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
-MEM_CCH=$(grep Cached /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
 MEM_REC=$(grep SReclaimable /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
+MEM_CCH=$(grep Cached /proc/meminfo | head -n 1 | awk '{printf "%d\n", $2 / 1024}')
 MEM_TOT=$(grep MemTotal /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
-let MEM_USE=$MEM_TOT-$MEM_FRE-$MEM_BUF-$MEM_CCH-$MEM_REC
+MEM_USE=$(expr $MEM_TOT - $MEM_FRE - $MEM_REC - $MEM_BUF - $MEM_CCH)
 
 OS_NAME=$(grep NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
 case $OS_NAME in
     [Aa]rch*)
         BANNER=("       /\         "
-              "      /  \        "
-              "     /\   \       "
-              "    /      \      "
-              "   /   ,,   \     "
-              "  /   |  |  -\    "
-              " /_-''    ''-_\   ")
+                "      /  \        "
+                "     /\   \       "
+                "    /      \      "
+                "   /   ,,   \     "
+                "  /   |  |  -\    "
+                " /_-''    ''-_\   ")
         PKGS="$(pacman -Q | wc -l)"
         ;;
     [Ff]edora*)
         BANNER=("        ,.......    "
-              "       |   ,..  |   "
-              "   ,...|  |..,'_'   "
-              " .' ,..   ...'      "
-              " | |   |  |         "
-              " | '...'  |         "
-              "  '------'          ")
+                "       |   ,..  |   "
+                "   ,...|  |..,'_'   "
+                " .' ,..   ...'      "
+                " | |   |  |         "
+                " | '...'  |         "
+                "  '------'          ")
         PKGS="$(rpm -qa | wc -l)"
         ;;
     [Uu]buntu*)
         BANNER=("                 "
-              "     , ---(__)   "
-              "    /  ___  \    "
-              " (__) |   |      "
-              "    \  --- _/    "
-              "     ' ---(__)   "
-              "                 ")
+                "     , ---(__)   "
+                "    /  ___  \    "
+                " (__) |   |      "
+                "    \  --- _/    "
+                "     ' ---(__)   "
+                "                 ")
         PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
         ;;
     [Dd]ebian*)
         BANNER=("   ______    "
-              " //  ,.  \   "
-              " |  / -' /   "
-              " |  \_.-'    "
-              " '.          "
-              "   '-__      "
-              "             ")
+                " //  ,.  \   "
+                " |  / -' /   "
+                " |  \_.-'    "
+                " '.          "
+                "   '-__      "
+                "             ")
         PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
         ;;
 esac
