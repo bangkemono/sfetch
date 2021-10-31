@@ -12,80 +12,137 @@ lblue=$(tput setaf 153)
 red=$(tput setaf 160)
 yellow=$(tput setaf 226)
 
-reset=$(tput sgr0)
 bold=$(tput bold)
-
-#BASIC INFO
-OS=$(grep PRETTY_NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
-KERNEL="$(uname -r)"
-USR="$(whoami)@$(cat /etc/hostname)"
-SHELL=$(grep "$USER" /etc/passwd | awk -F"/" '{printf "%s\n", $5}')
-UPTIME_MIN=$(awk '{printf "%d\n", $1 / 60 % 60}' /proc/uptime)
-UPTIME_HRS=$(awk '{printf "%d\n", $1 / 60 / 60 % 24}' /proc/uptime)
-UPTIME_DAY=$(awk '{printf "%d\n", $1 / 60 / 60 / 24}' /proc/uptime)
+NSFX=$(tput sgr0) #Name suffix
+NPFX="${NSFX}: ${bold}" #Name prefix
 
 #MEMORY (MEM_USE IS NOT 100% ACCURATE)
-MEM_FRE=$(grep MemFree /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
-MEM_BUF=$(grep Buffers /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
-MEM_REC=$(grep SReclaimable /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
-MEM_CCH=$(grep Cached /proc/meminfo | head -n 1 | awk '{printf "%d\n", $2 / 1024}')
-MEM_TOT=$(grep MemTotal /proc/meminfo | awk '{printf "%d\n", $2 / 1024}')
-MEM_USE=$(expr $MEM_TOT - $MEM_FRE - $MEM_REC - $MEM_BUF - $MEM_CCH)
+get_mem(){
+    while IFS=' ' read -r line mem _; do
+        case $line in
+            MemFree*)
+                MEM_FRE=$((mem / 1024))
+            ;;
+            Buffers*)
+                MEM_BUF=$((mem / 1024))
+            ;;
+            SReclaimable*)
+                MEM_REC=$((mem / 1024))
+                ;;
+            Cached*)
+                MEM_CCH=$((mem / 1024))
+                ;;
+            MemTotal*)
+                MEM_TOT=$((mem / 1024))
+                ;;
+        esac
+    done < /proc/meminfo
+    MEM_USE=$((MEM_TOT - MEM_FRE - MEM_REC - MEM_BUF - MEM_CCH))
+}
 
-OS_NAME=$(grep NAME /etc/os-release | head -n 1 | awk -F"=" {'print $2'} | sed -e 's/^"//' -e 's/"$//')
-case $OS_NAME in
-    [Aa]rch*)
-        BANNER0="       /\         "
-        BANNER1="      /  \        "
-        BANNER2="     /\   \       "
-        BANNER3="    /      \      "
-        BANNER4="   /   ,,   \     "
-        BANNER5="  /   |  |  -\    "
-        BANNER6=" /_-''    ''-_\   "
-        PKGS="$(pacman -Q | wc -l)"
-        ;;
-    [Ff]edora*)
-        BANNER0="        ,.......    "
-        BANNER1="       |   ,..  |   "
-        BANNER2="   ,...|  |..,'_'   "
-        BANNER3=" .' ,..   ...'      "
-        BANNER4=" | |   |  |         "
-        BANNER5=" | '...'  |         "
-        BANNER6="  '------'          "
-        PKGS="$(rpm -qa | wc -l)"
-        ;;
-    [Uu]buntu*)
-        BANNER0="                 "
-        BANNER1="     , ---(__)   "
-        BANNER2="    /  ___  \    "
-        BANNER3=" (__) |   |      "
-        BANNER4="    \  --- _/    "
-        BANNER5="     ' ---(__)   "
-        BANNER6="                 "
-        PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
-        ;;
-    [Dd]ebian*)
-        BANNER0="   ______    "
-        BANNER1=" //  ,.  \   "
-        BANNER2=" |  / -' /   "
-        BANNER3=" |  \_.-'    "
-        BANNER4=" '.          "
-        BANNER5="   '-__      "
-        BANNER6="             "
-        PKGS="$(dpkg-query -f '${binary:Package}\n' -W | wc -l)"
-        ;;
-esac
+#UPTIME
+get_uptime(){
+    while IFS='.' read -r time _; do
+        UPTIME_MIN=$((time / 60 % 60))
+        UPTIME_HRS=$((time / 60 / 60 % 24))
+        UPTIME_DAY=$((time / 60 / 60 / 24))
+    done < /proc/uptime 
+}
+
+get_os(){
+    while IFS='=' read -r line name; do
+        case $line in
+            #NAME) # for logo compatibility (change OS_NAME to OS_GENERIC @ get_logo_pkg)
+                #OS_GENERIC=$(echo $name | sed -e 's/^"//' -e 's/"$//')
+            #;;
+            PRETTY_NAME)
+                OS_NAME=${name##[\"\']} # strip without sed
+            ;;
+        esac
+    done < /etc/os-release
+}
+
+get_logo_pkg(){
+    case $OS_NAME in
+        [Aa]rch*)
+            BANNER0="      /\         "
+            BANNER1="     /  \        "
+            BANNER2="    /\   \       "
+            BANNER3="   /      \      "
+            BANNER4="  /   ,,   \     "
+            BANNER5=" /   |  |  -\    "
+            BANNER6="/_-''    ''-_\   "
+            PKGS="PKGS${NPFX}$(pacman -Qq | wc -l)${NSFX}"
+            ;;
+        [Ff]edora*)
+            BANNER0="       ,.......    "
+            BANNER1="      |   ,..  |   "
+            BANNER2="  ,...|  |..,'_'   "
+            BANNER3=".' ,..   ...'      "
+            BANNER4="| |   |  |         "
+            BANNER5="| '...'  |         "
+            BANNER6=" '------'          "
+            PKGS="PKGS${NPFX}$(rpm -qa | wc -l)${NSFX}"
+            ;;
+        [Uu]buntu*)
+            BANNER0="                "
+            BANNER1="    , ---(__)   "
+            BANNER2="   /  ___  \    "
+            BANNER3="(__) |   |      "
+            BANNER4="   \  --- _/    "
+            BANNER5="    ' ---(__)   "
+            BANNER6="                "
+            PKGS="PKGS${NPFX}$(dpkg-query -f '${binary:Package}\n' -W | wc -l)${NSFX}"
+            ;;
+        [Dd]ebian*)
+            BANNER0="  ______    "
+            BANNER1="//  ,.  \   "
+            BANNER2="|  / -' /   "
+            BANNER3="|  \_.-'    "
+            BANNER4="'.          "
+            BANNER5="  '-__      "
+            BANNER6="            "
+            PKGS="PKGS${NPFX}$(dpkg-query -f '${binary:Package}\n' -W | wc -l)${NSFX}"
+            ;;
+    esac
+}
+
+################################################################################################################
+
+#BASIC INFO (DONT CHANGE UNLESS FOR MAJOR CHANGES)
+get_mem
+get_uptime 
+get_os # run get_os for $OS_NAME
+get_logo_pkg # banner and packages
+
+USR="USR${NPFX}$(whoami)@$(cat /etc/hostname)${NSFX}"
+OS="OS${NPFX}${OS_NAME}${NSFX}"
+KERNEL="KERNEL${NPFX}$(uname -r)${NSFX}"
+SHELL="SHELL${NPFX}$(grep "$USER" /etc/passwd | awk -F"/" '{printf "%s\n", $5}')${NSFX}"
+CPU="CPU${NPFX}$(grep "model name" /proc/cpuinfo | head -n 1 | awk -F": " '{print $2}')${NSFX}"
+UPTIME="UPTIME${NPFX}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${NSFX}"
+MEM="MEM${NPFX}${MEM_USE}M/${MEM_TOT}M${NSFX}"
+NONE=$NSFX
 
 #CONFIGURATION
 #colors are available at the top of the file
 
 col=$lpink
 
-printf "${bold}${col}${BANNER0}USR${reset}: ${bold}${USR}${reset}\n"
-printf "${bold}${col}${BANNER1}OS${reset}: ${bold}${OS}${reset}\n"
-printf "${bold}${col}${BANNER2}KERNEL${reset}: ${bold}${KERNEL}${reset}\n"
-printf "${bold}${col}${BANNER3}PKGS${reset}: ${bold}${PKGS}${reset}\n"
-printf "${bold}${col}${BANNER4}SHELL${reset}: ${bold}${SHELL}${reset}\n" 
-printf "${bold}${col}${BANNER5}UPTIME${reset}: ${bold}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${reset}\n"
-printf "${bold}${col}${BANNER6}MEM${reset}: ${bold}${MEM_USE}M/${MEM_TOT}M${reset}\n\n"
+#6 rows available for customizing
+#use $NONE if you want it to be empty (it's better if $NONE is the last in order)
+S0=$USR
+S1=$OS
+S2=$KERNEL
+S3=$PKGS
+S4=$SHELL
+S5=$UPTIME
+S6=$MEM
 
+printf "${bold}${col}${BANNER0}${S0}\n"
+printf "${bold}${col}${BANNER1}${S1}\n"
+printf "${bold}${col}${BANNER2}${S2}\n"
+printf "${bold}${col}${BANNER3}${S3}\n"
+printf "${bold}${col}${BANNER4}${S4}\n" 
+printf "${bold}${col}${BANNER5}${S5}\n"
+printf "${bold}${col}${BANNER6}${S6}\n\n"
