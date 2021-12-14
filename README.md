@@ -7,32 +7,24 @@ A simple system information tool written in POSIX sh.
 to install, run this
 ```
 git clone https://github.com/bangkemono/sfetch
-cd sfetch && sudo make install
+cd sfetch && ./build.sh -i
+```
+
+to remove, do this
+```
+./build.sh -r
 ```
 
 ## CONFIGURATION
-currently, only colors and the info order are configurable, sfetch uses pink by default, but there are other colors
-```sh
-#CONFIGURATION
-#colors are available at the top of the file
-
-col=$lpink
-
-#6 rows available for customizing
-#use $NONE if you want it to be empty
-S0=$USR
-S1=$OS
-S2=$KERNEL
-S3=$PKGS
-S4=$SHELL
-S5=$UPTIME
-S6=$MEM
-```
-change $col and/or $S0 - $S6 to suit your needs
+an sfetch.config file will be generated in $HOME/.config/sfetch/ read it and mess around with it, configuration is not much
 
 ## OS SUPPORT
 Fedora, Arch, Debian, and Ubuntu are supported, the rest does not have banners and package detection. (more TBA)
 
-## CREDIT
+## POSSIBLE ERRORS 
+if you accidentally removed sfetch.config, once you run sfetch it might just give you a banner and nothing else, 
+to fix this just remove sfetch, and then install it again, or copy the sfetch.config to $HOME/.config/sfetch/ 
+
+## REFERENCES
 - [pfetch](https://github.com/dylanaraps/pfetch)
-    - heavily inspired by it, used some ASCII logos, and some bits of code as reference
+    - heavily inspired by it, used some ASCII logos, and some bits of code

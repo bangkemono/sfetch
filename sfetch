@@ -1,12 +1,9 @@
 #!/bin/sh
 
-# still in development
-# TBA : more colors, faster implementation, more banners
+# TBA : faster implementation, more banners
 
-#COLORS
 pink=$(tput setaf 175)
-lpink=$(tput setaf 224)
-green=$(tput setaf 71)
+lpink=$(tput setaf 224) green=$(tput setaf 71)
 white=$(tput setaf 255)
 lblue=$(tput setaf 153)
 red=$(tput setaf 160)
@@ -49,19 +46,20 @@ get_uptime(){
     done < /proc/uptime 
 }
 
+#OS (reads OS_NAME from /etc/os-release)
 get_os(){
     while IFS='=' read -r line name; do
         case $line in
-            #NAME) # for logo compatibility (change OS_NAME to OS_GENERIC @ get_logo_pkg)
-                #OS_GENERIC=$(echo $name | sed -e 's/^"//' -e 's/"$//')
-            #;;
             PRETTY_NAME)
-                OS_NAME=${name##[\"\']} # strip without sed
+                OS_NAME=$name
+                OS_NAME=${OS_NAME#\"} # strip quotes without using sed
+                OS_NAME=${OS_NAME%\"}
             ;;
         esac
     done < /etc/os-release
 }
 
+#LOGO and PKGS
 get_logo_pkg(){
     case $OS_NAME in
         [Aa]rch*)
@@ -109,11 +107,14 @@ get_logo_pkg(){
 
 ################################################################################################################
 
+CONFIG=/home/$(whoami)/.config
+S_CONFIG=${CONFIG}/sfetch/sfetch.config
+
 #BASIC INFO (DONT CHANGE UNLESS FOR MAJOR CHANGES)
+get_os
+get_logo_pkg
 get_mem
-get_uptime 
-get_os # run get_os for $OS_NAME
-get_logo_pkg # banner and packages
+get_uptime
 
 USR="USR${NPFX}$(whoami)@$(cat /etc/hostname)${NSFX}"
 OS="OS${NPFX}${OS_NAME}${NSFX}"
@@ -122,22 +123,17 @@ SHELL="SHELL${NPFX}$(grep "$USER" /etc/passwd | awk -F"/" '{printf "%s\n", $5}')
 CPU="CPU${NPFX}$(grep "model name" /proc/cpuinfo | head -n 1 | awk -F": " '{print $2}')${NSFX}"
 UPTIME="UPTIME${NPFX}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${NSFX}"
 MEM="MEM${NPFX}${MEM_USE}M/${MEM_TOT}M${NSFX}"
-NONE=$NSFX
+TERM="TERM${NPFX}$TERM${NSFX}"
+NONE=$NSFX 
 
-#CONFIGURATION
-#colors are available at the top of the file
-
-col=$lpink
-
-#6 rows available for customizing
-#use $NONE if you want it to be empty (it's better if $NONE is the last in order)
-S0=$USR
-S1=$OS
-S2=$KERNEL
-S3=$PKGS
-S4=$SHELL
-S5=$UPTIME
-S6=$MEM
+if [ -e $S_CONFIG ]
+then
+    . $S_CONFIG
+else
+    mkdir ${CONFIG}/sfetch/
+    cat sfetch.config > /dev/null 2>&1 >> $S_CONFIG
+    source $S_CONFIG
+fi
 
 printf "${bold}${col}${BANNER0}${S0}\n"
 printf "${bold}${col}${BANNER1}${S1}\n"
