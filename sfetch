@@ -3,11 +3,15 @@
 # TBA : faster implementation, more banners
 
 pink=$(tput setaf 175)
-lpink=$(tput setaf 224) green=$(tput setaf 71)
-white=$(tput setaf 255)
+lpink=$(tput setaf 224) 
+green=$(tput setaf 71)
+white=$(tput setaf 231)
 lblue=$(tput setaf 153)
 red=$(tput setaf 160)
 yellow=$(tput setaf 226)
+lyellow=$(tput setaf 230)
+purple=$(tput setaf 91)
+lpurple=$(tput setaf 170)
 
 bold=$(tput bold)
 NSFX=$(tput sgr0) #Name suffix
@@ -102,7 +106,17 @@ get_logo_pkg(){
             BANNER6="            "
             PKGS="PKGS${NPFX}$(dpkg-query -f '${binary:Package}\n' -W | wc -l)${NSFX}"
             ;;
-    esac
+        [Vv]oid*)
+            BANNER0="    _______     "
+            BANNER1=" _  \____  \    "
+            BANNER2="| \  ___ \  |   "
+            BANNER3="| | /   \ | |   "
+            BANNER4="| | \___/ | |   "
+            BANNER5="|  \____  \_|   "
+            BANNER6=" \______\       "
+            PKGS="PKGS${NPFX}$(xbps-query -l | wc -l)${NSFX}"
+            ;;
+	esac
 }
 
 ################################################################################################################
@@ -124,6 +138,7 @@ CPU="CPU${NPFX}$(grep "model name" /proc/cpuinfo | head -n 1 | awk -F": " '{prin
 UPTIME="UPTIME${NPFX}${UPTIME_DAY}d ${UPTIME_HRS}h ${UPTIME_MIN}m${NSFX}"
 MEM="MEM${NPFX}${MEM_USE}M/${MEM_TOT}M${NSFX}"
 TERM="TERM${NPFX}$TERM${NSFX}"
+RES="RES${NPFX}$(xdpyinfo | awk '/dimensions/ {print $2}')${NSFX}"
 NONE=$NSFX 
 
 if [ -e $S_CONFIG ]
