@@ -3,6 +3,9 @@
 
 A simple system information tool written in POSIX sh.
 
+## DEPENDENCIES
+sfetch needs *xdpyinfo* to display colors
+
 ## INSTALLATION
 to install, run this
 ```
